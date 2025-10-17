@@ -31,41 +31,30 @@ public class SlotMachineController : MonoBehaviour
     {
         if (spinning) return;
         spinning = true;
-
-        if (resultText != null)
-            resultText.text = "";
-
+        resultText.text = "";
         StartCoroutine(SpinSequence());
     }
 
     IEnumerator SpinSequence()
     {
-        // Start all reels spinning
         foreach (var reel in reels)
             reel.StartSpin(spinPhaseDuration, 0);
 
-        // Wait until all reels have finished
         yield return new WaitUntil(() => AllReelsStopped());
-
-        // Check result and apply payout
         EvaluatePayout();
-
         spinning = false;
     }
 
     bool AllReelsStopped()
     {
         foreach (var reel in reels)
-        {
-            if (reel.IsSpinning())
-                return false;
-        }
+            if (reel.IsSpinning()) return false;
         return true;
     }
 
+    // Calculates and displays rewards based on reel results
     void EvaluatePayout()
     {
-        // Get the actual center symbols from each reel
         string[] visibleSymbols = new string[reels.Length];
         for (int i = 0; i < reels.Length; i++)
             visibleSymbols[i] = reels[i].GetCenterSymbolName();
@@ -76,14 +65,9 @@ public class SlotMachineController : MonoBehaviour
         totalScore += payout;
         UpdateScoreText();
 
-        if (payout > 0)
-        {
-            resultText.text = $"<color=#FFD700><b>+{payout} POINTS!</b></color>";
-        }
-        else
-        {
-            resultText.text = "<color=#FF5555>Try Again!</color>";
-        }
+        resultText.text = payout > 0
+            ? $"<color=#FFD700><b>+{payout} POINTS!</b></color>"
+            : "<color=#FF5555>Try Again!</color>";
     }
 
     int CalculatePayout(string[] symbols)
@@ -94,13 +78,11 @@ public class SlotMachineController : MonoBehaviour
         string s2 = symbols[1];
         string s3 = symbols[2];
 
-        // --- Triple matches ---
         if (s1 == "7" && s2 == "7" && s3 == "7") return 500;
         if (s1 == "Bell" && s2 == "Bell" && s3 == "Bell") return 200;
         if (s1 == "Bar" && s2 == "Bar" && s3 == "Bar") return 150;
         if (s1 == "Cherry" && s2 == "Cherry" && s3 == "Cherry") return 100;
 
-        // --- Two matches ---
         if (s1 == s2 || s2 == s3 || s1 == s3)
         {
             string matched = s1 == s2 ? s1 : s2 == s3 ? s2 : s1;
@@ -113,7 +95,6 @@ public class SlotMachineController : MonoBehaviour
             }
         }
 
-        // --- No match ---
         return 0;
     }
 
