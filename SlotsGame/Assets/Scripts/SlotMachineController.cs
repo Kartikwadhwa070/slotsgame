@@ -8,25 +8,32 @@ public class SlotMachineController : MonoBehaviour
     public ReelSpinner[] reels;
     public Button spinButton;
     public TextMeshProUGUI resultText;
+    public TextMeshProUGUI scoreText;
 
     [Header("Spin Timing")]
-    public float spinPhaseDuration = 2.0f; // how long the main spin phase runs
+    public float spinPhaseDuration = 2.0f;
 
     private bool spinning = false;
+    private int totalScore = 0;
 
     void Start()
     {
         if (spinButton != null)
             spinButton.onClick.AddListener(StartSpin);
+
         if (resultText != null)
             resultText.text = "";
+
+        UpdateScoreText();
     }
 
     void StartSpin()
     {
         if (spinning) return;
         spinning = true;
-        if (resultText != null) resultText.text = "";
+
+        if (resultText != null)
+            resultText.text = "";
 
         StartCoroutine(SpinSequence());
     }
@@ -35,15 +42,14 @@ public class SlotMachineController : MonoBehaviour
     {
         // Start all reels spinning
         foreach (var reel in reels)
-        {
-            reel.StartSpin(spinPhaseDuration, 0); // 0 is unused (no randomization)
-        }
+            reel.StartSpin(spinPhaseDuration, 0);
 
-        // Wait until all reels have finished spinning
+        // Wait until all reels have finished
         yield return new WaitUntil(() => AllReelsStopped());
 
-        // Now check visible results
-        CheckWin();
+        // Check result and apply payout
+        EvaluatePayout();
+
         spinning = false;
     }
 
@@ -57,24 +63,63 @@ public class SlotMachineController : MonoBehaviour
         return true;
     }
 
-    void CheckWin()
+    void EvaluatePayout()
     {
-        string firstSymbol = reels[0].GetCenterSymbolName();
-        bool win = true;
+        // Get the actual center symbols from each reel
+        string[] visibleSymbols = new string[reels.Length];
+        for (int i = 0; i < reels.Length; i++)
+            visibleSymbols[i] = reels[i].GetCenterSymbolName();
 
-        for (int i = 1; i < reels.Length; i++)
+        Debug.Log("Results: " + string.Join(", ", visibleSymbols));
+
+        int payout = CalculatePayout(visibleSymbols);
+        totalScore += payout;
+        UpdateScoreText();
+
+        if (payout > 0)
         {
-            if (reels[i].GetCenterSymbolName() != firstSymbol)
+            resultText.text = $"<color=#FFD700><b>+{payout} POINTS!</b></color>";
+        }
+        else
+        {
+            resultText.text = "<color=#FF5555>Try Again!</color>";
+        }
+    }
+
+    int CalculatePayout(string[] symbols)
+    {
+        if (symbols.Length < 3) return 0;
+
+        string s1 = symbols[0];
+        string s2 = symbols[1];
+        string s3 = symbols[2];
+
+        // --- Triple matches ---
+        if (s1 == "7" && s2 == "7" && s3 == "7") return 500;
+        if (s1 == "Bell" && s2 == "Bell" && s3 == "Bell") return 200;
+        if (s1 == "Bar" && s2 == "Bar" && s3 == "Bar") return 150;
+        if (s1 == "Cherry" && s2 == "Cherry" && s3 == "Cherry") return 100;
+
+        // --- Two matches ---
+        if (s1 == s2 || s2 == s3 || s1 == s3)
+        {
+            string matched = s1 == s2 ? s1 : s2 == s3 ? s2 : s1;
+            switch (matched)
             {
-                win = false;
-                break;
+                case "7": return 50;
+                case "Cherry": return 30;
+                case "Bell": return 25;
+                case "Bar": return 20;
             }
         }
 
-        resultText.text = win
-            ? "<color=#FFD700><b> JACKPOT!</b></color>"
-            : "<color=#FF5555>Try Again!</color>";
+        // --- No match ---
+        return 0;
+    }
 
-        Debug.Log("Results: " + string.Join(", ", System.Array.ConvertAll(reels, r => r.GetCenterSymbolName())));
+    void UpdateScoreText()
+    {
+        if (scoreText != null)
+            scoreText.text = $"Score: <b>{totalScore}</b>";
     }
 }
