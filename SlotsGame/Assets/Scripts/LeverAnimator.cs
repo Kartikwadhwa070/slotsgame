@@ -20,11 +20,11 @@ public class LeverAnimator : MonoBehaviour
         leverImage = GetComponent<Image>();
         if (leverImage == null)
         {
-            Debug.LogError("[LeverAnimator] ❌ No Image component found on this object!");
+            Debug.LogError(" No Image component found on this object!");
         }
         else
         {
-            Debug.Log("[LeverAnimator] ✅ Found Image component: " + leverImage.name);
+            Debug.Log(" Found Image component: " + leverImage.name);
         }
     }
 
@@ -46,39 +46,39 @@ public class LeverAnimator : MonoBehaviour
     {
         if (isPulled)
         {
-            Debug.Log("[LeverAnimator] ⚠ Lever already pulled — ignoring extra click.");
+            Debug.Log(" Lever already pulled — ignoring extra click.");
             return;
         }
 
         isPulled = true;
-        Debug.Log("[LeverAnimator] 🎬 Lever pulled!");
+        Debug.Log(" Lever pulled!");
 
         // Switch to down sprite
         if (leverImage != null && leverDownSprite != null)
         {
             leverImage.sprite = leverDownSprite;
-            Debug.Log("[LeverAnimator] Lever sprite set to DOWN.");
+            Debug.Log("Lever sprite set to DOWN.");
         }
         else
         {
-            Debug.LogWarning("[LeverAnimator] Lever image or down sprite not assigned!");
+            Debug.LogWarning(" Lever image or down sprite not assigned!");
         }
 
         // Trigger slot machine spin
         if (slotController != null)
         {
-            Debug.Log("[LeverAnimator] ▶ Sending spin command to SlotMachineController...");
+            Debug.Log(" Sending spin command to SlotMachineController...");
             slotController.SendMessage("StartSpin", SendMessageOptions.DontRequireReceiver);
         }
         else
         {
-            Debug.LogWarning("[LeverAnimator] ⚠ No SlotMachineController assigned!");
+            Debug.LogWarning(" No SlotMachineController assigned!");
         }
 
         // Auto return lever up
         if (autoReturn)
         {
-            Debug.Log("[LeverAnimator] ⏳ Lever will return up in " + pullDownTime + " seconds.");
+            Debug.Log("Lever will return up in " + pullDownTime + " seconds.");
             Invoke(nameof(ReturnLever), pullDownTime);
         }
     }
@@ -88,11 +88,11 @@ public class LeverAnimator : MonoBehaviour
         if (leverImage != null && leverUpSprite != null)
         {
             leverImage.sprite = leverUpSprite;
-            Debug.Log("[LeverAnimator] 🔼 Lever returned to UP position.");
+            Debug.Log(" Lever returned to UP position.");
         }
         else
         {
-            Debug.LogWarning("[LeverAnimator] Lever image or up sprite missing when trying to return!");
+            Debug.LogWarning(" Lever image or up sprite missing when trying to return!");
         }
 
         isPulled = false;

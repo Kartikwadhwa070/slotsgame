@@ -7,6 +7,7 @@ public class SlotMachineController : MonoBehaviour
 {
     public ReelSpinner[] reels;
     public Button spinButton;
+    public Button instructionsButton; // 👈 Add your Instructions button here
     public TextMeshProUGUI resultText;
     public TextMeshProUGUI scoreText;
 
@@ -32,6 +33,11 @@ public class SlotMachineController : MonoBehaviour
         if (spinning) return;
         spinning = true;
         resultText.text = "";
+
+        // 🔒 Disable UI buttons during spin
+        if (spinButton != null) spinButton.interactable = false;
+        if (instructionsButton != null) instructionsButton.interactable = false;
+
         StartCoroutine(SpinSequence());
     }
 
@@ -42,7 +48,11 @@ public class SlotMachineController : MonoBehaviour
 
         yield return new WaitUntil(() => AllReelsStopped());
         EvaluatePayout();
+
+        // 🔓 Re-enable buttons after spin completes
         spinning = false;
+        if (spinButton != null) spinButton.interactable = true;
+        if (instructionsButton != null) instructionsButton.interactable = true;
     }
 
     bool AllReelsStopped()
@@ -52,7 +62,6 @@ public class SlotMachineController : MonoBehaviour
         return true;
     }
 
-    // Calculates and displays rewards based on reel results
     void EvaluatePayout()
     {
         string[] visibleSymbols = new string[reels.Length];

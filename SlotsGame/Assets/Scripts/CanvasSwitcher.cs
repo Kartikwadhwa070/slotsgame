@@ -3,22 +3,16 @@ using UnityEngine;
 public class CanvasSwitcher : MonoBehaviour
 {
     [Header("Canvas References")]
-    public Canvas[] canvases; // All canvases in your scene (e.g. MainMenu, Game, Settings)
-
+    public Canvas[] canvases;
     private Canvas activeCanvas;
 
     void Start()
     {
-        // Optional: activate the first one by default
         if (canvases.Length > 0)
-        {
             ShowCanvas(canvases[0].name);
-        }
     }
 
-    /// <summary>
-    /// Switch to a canvas by its name.
-    /// </summary>
+    // Switch to a canvas by its name
     public void ShowCanvas(string canvasName)
     {
         bool found = false;
@@ -34,22 +28,20 @@ public class CanvasSwitcher : MonoBehaviour
             {
                 activeCanvas = canvas;
                 found = true;
-                Debug.Log("[CanvasSwitcher] 🎬 Switched to canvas: " + canvas.name);
+                Debug.Log(" Switched to canvas: " + canvas.name);
             }
         }
 
         if (!found)
-            Debug.LogWarning("[CanvasSwitcher] ⚠ Canvas not found with name: " + canvasName);
+            Debug.LogWarning(" Canvas not found: " + canvasName);
     }
 
-    /// <summary>
-    /// Switch to a canvas by reference (if you already have the Canvas object).
-    /// </summary>
+    // Switch to a canvas directly using a reference
     public void ShowCanvas(Canvas targetCanvas)
     {
         if (targetCanvas == null)
         {
-            Debug.LogWarning("[CanvasSwitcher] ⚠ Target canvas is null!");
+            Debug.LogWarning(" Target canvas is null!");
             return;
         }
 
@@ -63,14 +55,12 @@ public class CanvasSwitcher : MonoBehaviour
             if (isTarget)
             {
                 activeCanvas = canvas;
-                Debug.Log("[CanvasSwitcher] 🎬 Switched to canvas: " + canvas.name);
+                Debug.Log("Switched to canvas: " + canvas.name);
             }
         }
     }
 
-    /// <summary>
-    /// Get the currently active canvas.
-    /// </summary>
+    // Returns the currently active canvas
     public Canvas GetActiveCanvas()
     {
         return activeCanvas;

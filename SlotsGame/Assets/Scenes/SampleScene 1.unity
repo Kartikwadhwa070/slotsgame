@@ -1567,6 +1567,7 @@ MonoBehaviour:
   - {fileID: 1123370321}
   - {fileID: 1843141203}
   spinButton: {fileID: 1860724179}
+  instructionsButton: {fileID: 1813925099}
   resultText: {fileID: 506141310}
   scoreText: {fileID: 1410185074}
   spinPhaseDuration: 2
