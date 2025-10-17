@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro; // ✅ Required for TextMeshPro
 using System.Collections;
 
 public class SlotMachineController : MonoBehaviour
@@ -17,7 +18,7 @@ public class SlotMachineController : MonoBehaviour
 
     [Header("UI")]
     public Button spinButton;
-    public Text resultText;
+    public TextMeshProUGUI resultText; // ✅ Changed from Text → TextMeshProUGUI
 
     [Header("Spin Settings")]
     public float spinDuration = 2f;
@@ -89,11 +90,11 @@ public class SlotMachineController : MonoBehaviour
 
         if (allSame)
         {
-            resultText.text = "🎉 JACKPOT!";
+            resultText.text = "<color=#FFD700>🎉 JACKPOT!</color>"; // ✅ Styled TMP text
         }
         else
         {
-            resultText.text = "Try Again!";
+            resultText.text = "<color=#FF5555>Try Again!</color>";
         }
     }
 }
