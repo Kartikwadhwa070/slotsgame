@@ -1,100 +1,80 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // ✅ Required for TextMeshPro
+using TMPro;
 using System.Collections;
 
 public class SlotMachineController : MonoBehaviour
 {
-    [System.Serializable]
-    public class Reel
-    {
-        public Image display;
-        public Sprite[] symbols;
-        [HideInInspector] public int currentIndex;
-    }
-
-    [Header("Reels Setup")]
-    public Reel[] reels;
-
-    [Header("UI")]
+    public ReelSpinner[] reels;
     public Button spinButton;
-    public TextMeshProUGUI resultText; // ✅ Changed from Text → TextMeshProUGUI
+    public TextMeshProUGUI resultText;
 
-    [Header("Spin Settings")]
-    public float spinDuration = 2f;
-    public float spinSpeed = 0.1f;
+    [Header("Spin Timing")]
+    public float spinPhaseDuration = 2.0f; // how long the main spin phase runs
 
-    private bool isSpinning = false;
+    private bool spinning = false;
 
     void Start()
     {
-        spinButton.onClick.AddListener(StartSpin);
-        resultText.text = "";
+        if (spinButton != null)
+            spinButton.onClick.AddListener(StartSpin);
+        if (resultText != null)
+            resultText.text = "";
     }
 
     void StartSpin()
     {
-        if (isSpinning) return;
-        StartCoroutine(SpinRoutine());
+        if (spinning) return;
+        spinning = true;
+        if (resultText != null) resultText.text = "";
+
+        StartCoroutine(SpinSequence());
     }
 
-    IEnumerator SpinRoutine()
+    IEnumerator SpinSequence()
     {
-        isSpinning = true;
-        resultText.text = "";
-
-        float timer = 0f;
-
-        // Random final results for each reel
-        int[] results = new int[reels.Length];
-        for (int i = 0; i < reels.Length; i++)
-            results[i] = Random.Range(0, reels[i].symbols.Length);
-
-        // Animate spinning
-        while (timer < spinDuration)
+        // Start all reels spinning
+        foreach (var reel in reels)
         {
-            for (int i = 0; i < reels.Length; i++)
-            {
-                int index = Random.Range(0, reels[i].symbols.Length);
-                reels[i].display.sprite = reels[i].symbols[index];
-            }
-
-            timer += spinSpeed;
-            yield return new WaitForSeconds(spinSpeed);
+            reel.StartSpin(spinPhaseDuration, 0); // 0 is unused (no randomization)
         }
 
-        // Stop and set to final results
-        for (int i = 0; i < reels.Length; i++)
-        {
-            reels[i].currentIndex = results[i];
-            reels[i].display.sprite = reels[i].symbols[results[i]];
-        }
+        // Wait until all reels have finished spinning
+        yield return new WaitUntil(() => AllReelsStopped());
 
-        CheckResult();
-        isSpinning = false;
+        // Now check visible results
+        CheckWin();
+        spinning = false;
     }
 
-    void CheckResult()
+    bool AllReelsStopped()
     {
-        bool allSame = true;
-        int first = reels[0].currentIndex;
+        foreach (var reel in reels)
+        {
+            if (reel.IsSpinning())
+                return false;
+        }
+        return true;
+    }
+
+    void CheckWin()
+    {
+        string firstSymbol = reels[0].GetCenterSymbolName();
+        bool win = true;
 
         for (int i = 1; i < reels.Length; i++)
         {
-            if (reels[i].currentIndex != first)
+            if (reels[i].GetCenterSymbolName() != firstSymbol)
             {
-                allSame = false;
+                win = false;
                 break;
             }
         }
 
-        if (allSame)
-        {
-            resultText.text = "<color=#FFD700>🎉 JACKPOT!</color>"; // ✅ Styled TMP text
-        }
-        else
-        {
-            resultText.text = "<color=#FF5555>Try Again!</color>";
-        }
+        resultText.text = win
+            ? "<color=#FFD700><b> JACKPOT!</b></color>"
+            : "<color=#FF5555>Try Again!</color>";
+
+        Debug.Log("Results: " + string.Join(", ", System.Array.ConvertAll(reels, r => r.GetCenterSymbolName())));
     }
 }
